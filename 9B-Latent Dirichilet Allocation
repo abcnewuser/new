@@ -1,0 +1,40 @@
+from sklearn.decomposition import LatentDirichletAllocation, TruncatedSVD
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+import numpy as np
+
+# Sample corpus
+corpus = [
+    'the quick brown fox',
+    'the slow brown dog',
+    'the quick red dog',
+    'the lazy yellow fox'
+]
+
+# Create the count vectorizer (bag-of-words)
+vectorizer = CountVectorizer(stop_words='english')
+
+# Fit and transform the corpus into a document-term matrix
+X = vectorizer.fit_transform(corpus)
+
+# 1. Latent Dirichlet Allocation (LDA) - Topic Modeling
+lda = LatentDirichletAllocation(n_components=2, random_state=42)
+lda_topics = lda.fit_transform(X)
+
+# Display the topics
+print("LDA Topics:")
+for topic_idx, topic in enumerate(lda.components_):
+    print(f"Topic {topic_idx + 1}:")
+    print([vectorizer.get_feature_names_out()[i] for i in topic.argsort()[:-6 - 1:-1]])
+    print()
+
+# 2. Latent Semantic Analysis (LSA) - Dimensionality Reduction
+lsa = TruncatedSVD(n_components=2, random_state=42)
+lsa_topics = lsa.fit_transform(X)
+
+# Display the LSA Topics
+print("LSA Topics:")
+terms = vectorizer.get_feature_names_out()
+for idx, topic in enumerate(lsa.components_):
+    print(f"Topic {idx + 1}:")
+    print([terms[i] for i in topic.argsort()[:-6 - 1:-1]])
+    print()
