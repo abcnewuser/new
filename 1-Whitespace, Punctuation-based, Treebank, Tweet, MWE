@@ -1,0 +1,58 @@
+import nltk
+from nltk.tokenize import word_tokenize, regexp_tokenize, TweetTokenizer, MWETokenizer
+from nltk.stem import PorterStemmer, SnowballStemmer
+from nltk.corpus import stopwords, wordnet
+from nltk.stem import WordNetLemmatizer
+
+# Download necessary NLTK data
+nltk.download('punkt')
+nltk.download('wordnet')
+nltk.download('stopwords')
+# Download the specific punkt_tab resource required by the tokenizer
+nltk.download('punkt_tab')
+
+
+# Sample text for tokenization and processing
+text = "Hello there! How's it going? #Awesome day for coding. Let's get started with NLP."
+
+# 1. Whitespace Tokenization
+whitespace_tokens = text.split()
+print("Whitespace Tokenization:", whitespace_tokens)
+
+# 2. Punctuation-based Tokenization (using regex)
+punctuation_tokens = regexp_tokenize(text, pattern=r'\s|[\.,!?;"]')
+print("Punctuation-based Tokenization:", punctuation_tokens)
+
+# 3. Treebank Tokenization
+treebank_tokens = nltk.word_tokenize(text)
+print("Treebank Tokenization:", treebank_tokens)
+
+# 4. Tweet Tokenization
+tweet_tokenizer = TweetTokenizer()
+tweet_tokens = tweet_tokenizer.tokenize(text)
+print("Tweet Tokenization:", tweet_tokens)
+
+# 5. Multi-Word Expressions (MWE) Tokenization
+mwe_tokenizer = MWETokenizer([('NLP', 'tool'), ('awesome', 'day')])
+mwe_tokens = mwe_tokenizer.tokenize(text.split())
+print("MWE Tokenization:", mwe_tokens)
+
+# Stemming using Porter and Snowball Stemmer
+porter_stemmer = PorterStemmer()
+snowball_stemmer = SnowballStemmer('english')
+
+# Example words for stemming
+words = ["running", "jumps", "easily", "better"]
+
+porter_stems = [porter_stemmer.stem(word) for word in words]
+snowball_stems = [snowball_stemmer.stem(word) for word in words]
+
+print("Porter Stemming:", porter_stems)
+print("Snowball Stemming:", snowball_stems)
+
+# 6. Lemmatization (Using WordNet Lemmatizer)
+lemmatizer = WordNetLemmatizer()
+
+# Example words for lemmatization
+lemmatized_words = [lemmatizer.lemmatize(word, pos='v') for word in words]  # 'v' for verb, can change based on context
+print("Lemmatization:", lemmatized_words)
