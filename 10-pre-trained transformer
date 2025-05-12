@@ -1,0 +1,75 @@
+import torch
+from transformers import BertTokenizer, BertForSequenceClassification, Trainer, TrainingArguments
+from datasets import Dataset
+from sklearn.model_selection import train_test_split
+
+# Step 1: Prepare Data (Input sentences and corresponding labels)
+data = [
+    ('The cat sat on the mat.', 0),  # Nature
+    ('Dogs are great pets.', 0),  # Nature
+    ('I love to play football.', 1),  # Sports
+    ('Data science is an interdisciplinary field.', 2),  # Science
+    ('Python is a great programming language.', 3),  # Technology
+    ('Machine learning is a subset of artificial intelligence.', 3),  # AI/ML
+    ('Artificial intelligence and machine learning are popular topics.', 3),  # AI/ML
+    ('Deep learning is a type of machine learning.', 3),  # AI/ML
+    ('Natural language processing involves analyzing text data.', 2),  # Science
+    ('I enjoy hiking and outdoor activities.', 0)  # Nature
+]
+
+# Convert to Dataset format
+df = pd.DataFrame(data, columns=['sentence', 'label'])
+train_data, test_data = train_test_split(df, test_size=0.2)
+
+train_dataset = Dataset.from_pandas(train_data)
+test_dataset = Dataset.from_pandas(test_data)
+
+# Step 2: Load Pretrained BERT Model and Tokenizer
+tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=4)
+
+# Step 3: Tokenize the dataset
+def tokenize_function(examples):
+    return tokenizer(examples['sentence'], padding="max_length", truncation=True)
+
+train_dataset = train_dataset.map(tokenize_function, batched=True)
+test_dataset = test_dataset.map(tokenize_function, batched=True)
+
+# Step 4: Define Training Arguments
+training_args = TrainingArguments(
+    output_dir='./results',
+    num_train_epochs=3,
+    per_device_train_batch_size=8,
+    per_device_eval_batch_size=8,
+    warmup_steps=500,
+    weight_decay=0.01,
+    logging_dir='./logs',
+    logging_steps=10,
+)
+
+# Step 5: Fine-tune the Model using Trainer API
+trainer = Trainer(
+    model=model,
+    args=training_args,
+    train_dataset=train_dataset,
+    eval_dataset=test_dataset
+)
+
+# Step 6: Train the Model
+trainer.train()
+
+# Step 7: Evaluate the Model
+results = trainer.evaluate()
+
+# Step 8: Make Predictions on New Sentences
+sentences = [
+    "Artificial intelligence is transforming industries.",
+    "Football is an exciting sport."
+]
+
+inputs = tokenizer(sentences, padding=True, truncation=True, return_tensors="pt")
+with torch.no_grad():
+    logits = model(**inputs).logits
+
+predictions = torch.argmax(logits, dim=-1)
+print(predictions)  # Class labels for the sentences
