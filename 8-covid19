@@ -1,0 +1,64 @@
+import pandas as pd
+import nltk
+from nltk.tokenize import word_tokenize
+from gensim.models import FastText
+import numpy as np
+
+nltk.download('punkt')
+
+# -----------------------
+# 1. Load COVID-19 Dataset
+# -----------------------
+df = pd.read_csv('covid_data.csv')  # Change to your CSV filename
+text_column = 'text'  # Change this if your column is named differently
+
+# Drop empty rows and lowercase
+df[text_column].dropna(inplace=True)
+corpus = df[text_column].astype(str).str.lower().tolist()
+
+# Tokenize text
+tokenized_corpus = [word_tokenize(sent) for sent in corpus]
+
+# -----------------------
+# 2. Train FastText Model
+# -----------------------
+print("🔁 Training FastText model...")
+fasttext_model = FastText(sentences=tokenized_corpus, vector_size=100, window=5, min_count=2, epochs=10)
+
+# Example: Vector for 'covid'
+print("\n🔹 FastText vector for 'covid':")
+print(fasttext_model.wv['covid'])
+
+# Save FastText vectors
+fasttext_model.wv.save_word2vec_format("fasttext_covid_vectors.txt")
+print("✅ FastText vectors saved to 'fasttext_covid_vectors.txt'")
+
+# -----------------------
+# 3. Load GloVe Vectors (100D)
+# -----------------------
+glove_file = 'glove.6B.100d.txt'  # Download from https://nlp.stanford.edu/data/glove.6B.zip
+
+print("\n📦 Loading GloVe vectors (100D)...")
+glove_vectors = {}
+with open(glove_file, 'r', encoding='utf-8') as f:
+    for line in f:
+        parts = line.strip().split()
+        word = parts[0]
+        vec = np.array(parts[1:], dtype=np.float32)
+        glove_vectors[word] = vec
+
+# Example: GloVe vector for 'vaccine'
+print("\n🔹 GloVe vector for 'vaccine':")
+print(glove_vectors.get('vaccine', 'Word not found in GloVe'))
+
+# -----------------------
+# 4. Save GloVe Subset (only words in your dataset)
+# -----------------------
+used_words = set(word for sent in tokenized_corpus for word in sent)
+with open("glove_covid_subset.txt", "w") as f:
+    for word in used_words:
+        if word in glove_vectors:
+            vec_str = " ".join(map(str, glove_vectors[word]))
+            f.write(f"{word} {vec_str}\n")
+
+print("✅ GloVe vectors subset saved to 'glove_covid_subset.txt'")
