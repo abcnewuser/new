@@ -1,0 +1,15 @@
+import spacy
+
+# Load English model
+nlp = spacy.load("en_core_web_sm")
+
+# Given text
+text = """Deepak Jasani, Head of retail research, HDFC Securities, said: “Investors will look to the European Central Bank later Thursday for reassurance that surging prices are just transitory, and not about to spiral out of control. In addition to the ECB policy meeting, investors are awaiting a report later Thursday on US economic growth, which is likely to show a cooling recovery, as well as weekly jobs data.”"""
+
+# Process text
+doc = nlp(text)
+
+# Print named entities
+print("Named Entities, Labels:")
+for ent in doc.ents:
+    print(ent.text, "-", ent.label_)
