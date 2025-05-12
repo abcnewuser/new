@@ -1,0 +1,19 @@
+import nltk
+from nltk.corpus import wordnet as wn
+from nltk.wsd import lesk
+
+# Download WordNet resources (only once needed)
+nltk.download('wordnet')
+nltk.download('omw-1.4')
+nltk.download('punkt')
+
+# Example sentence
+sentence = "He deposited the money in the bank"
+word = "bank"
+
+# Word Sense Disambiguation using Lesk Algorithm
+sense = lesk(sentence.split(), word)
+print(f"Word: {word}")
+print("Best Sense:", sense)
+print("Definition:", sense.definition())
+print("Synonyms:", [lemma.name() for lemma in sense.lemmas()])
