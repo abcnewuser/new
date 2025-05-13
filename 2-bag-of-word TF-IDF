@@ -26,4 +26,19 @@ tokenized = [word_tokenize(sentence) for sentence in corpus]
 model = Word2Vec(tokenized, vector_size= 50, window = 2, min_count = 1)
 
 print("word2vec vector for cats:", model.wv['cats'])
-      
+
+
+
+
+
+corpus = []
+
+print("Enter sentences one by one. Type 'done' when finished:")
+
+while True:
+    sentence = input("Enter a sentence: ")
+    if sentence.lower() == 'done':
+        break
+    corpus.append(sentence)
+
+print("Corpus:", corpus)
