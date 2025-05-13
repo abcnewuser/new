@@ -1,0 +1,52 @@
+import nltk
+
+# Download required NLTK data (only once)
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger_eng')
+# Download the 'punkt_tab' resource
+nltk.download('punkt_tab')
+
+# Sample sentence
+sentence = "John saw the red car parked outside the house"
+
+# Tokenize and POS tag
+words = nltk.word_tokenize(sentence)
+pos_tags = nltk.pos_tag(words)
+
+print("\n📌 POS Tags:")
+print(pos_tags)
+
+# ------------------------
+# 1. SHALLOW PARSER (CHUNKING)
+# ------------------------
+
+# Define chunk grammar (Noun Phrase)
+chunk_grammar = "NP: {<DT>?<JJ>*<NN|NNS>+}"
+
+# Create and apply chunk parser
+chunk_parser = nltk.RegexpParser(chunk_grammar)
+chunk_tree = chunk_parser.parse(pos_tags)
+
+print("\n🟢 Shallow Parser (Noun Phrases):")
+for subtree in chunk_tree.subtrees():
+    if subtree.label() == 'NP':
+        print("NP Chunk:", subtree)
+
+# ------------------------
+# 2. REGEX PARSER (WITH MULTIPLE RULES)
+# ------------------------
+
+# Custom grammar with NP and VP
+regex_grammar = r"""
+  NP: {<DT>?<JJ>*<NN|NNS>}         # Noun Phrase
+  VP: {<VB.*><NP>}                 # Verb Phrase
+"""
+
+# Create and apply regex parser
+regex_parser = nltk.RegexpParser(regex_grammar)
+regex_tree = regex_parser.parse(pos_tags)
+
+print("\n🔵 Regex Parser (NP and VP):")
+for subtree in regex_tree.subtrees():
+    if subtree.label() in ['NP', 'VP']:
+        print(subtree.label(), ":", subtree)
